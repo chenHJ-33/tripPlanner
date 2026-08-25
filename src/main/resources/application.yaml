@@ -1,3 +1,9 @@
 spring:
   application:
     name: tripPlanner
+trip:
+  llm:
+    model: qwen-max
+agentscope:
+  dashscope:
+    api-key: ${ai.apikey}
