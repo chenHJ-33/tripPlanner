@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: local
   application:
     name: tripPlanner
 trip:
@@ -7,3 +9,11 @@ trip:
 agentscope:
   dashscope:
     api-key: ${ai.apikey}
+mcp:
+  unsplash:
+    access-key: ${unsplash.accesskey}
+    secret-key: ${unsplash.accesssecret}
+  gaode:
+    key: ${gaode.key}
+    # stdio=本地子进程 uvx amap-mcp-server；http=直连高德官方托管端点
+    transport: http
