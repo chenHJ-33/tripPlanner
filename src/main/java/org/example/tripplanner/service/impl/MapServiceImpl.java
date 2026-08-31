@@ -3,12 +3,16 @@ package org.example.tripplanner.service.impl;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tripplanner.pojo.entity.POIInfo;
+import org.example.tripplanner.pojo.entity.RouteInfo;
 import org.example.tripplanner.pojo.entity.WeatherInfo;
 import org.example.tripplanner.pojo.request.POISearchRequest;
+import org.example.tripplanner.pojo.request.RouteRequest;
 import org.example.tripplanner.pojo.response.POISearchResponse;
+import org.example.tripplanner.pojo.response.RouteResponse;
 import org.example.tripplanner.pojo.response.WeatherResponse;
 import org.example.tripplanner.service.MapService;
 import org.example.tripplanner.tool.AmapPoiParser;
+import org.example.tripplanner.tool.AmapRouteParser;
 import org.example.tripplanner.tool.AmapWeatherParser;
 import org.example.tripplanner.tool.MCPTool;
 import org.springframework.stereotype.Service;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 地图服务实现：通过高德地图 MCP 工具查询
@@ -72,8 +77,7 @@ public class MapServiceImpl implements MapService {
             Map<String,Object> args=new HashMap<>();
             args.put("city",city);
             String text = mcpTool.callTool(TOOL_WEATHER, args);
-            log.info("天气查询原始数据: {}", abbreviate(text));
-
+            log.info("天气搜索结果：{}",abbreviate(text));
             List<WeatherInfo> forecasts = AmapWeatherParser.parse(text);
             wr.setSuccess(true);
             wr.setMessage("天气查询成功");
@@ -85,6 +89,46 @@ public class MapServiceImpl implements MapService {
             wr.setMessage("搜索天气失败"+e.getMessage());
         }
         return wr;
+    }
+
+    @Override
+    public RouteResponse planRoute(RouteRequest request) {
+        RouteResponse rr=new RouteResponse();
+        if (request == null || request.getOriginAddress() == null || request.getDestinationAddress() == null) {
+            rr.setMessage("起点地址与终点地址不能为空");
+            rr.setSuccess(false);
+            return rr;
+        }
+        try {
+            Map<String,String> toolMap=new HashMap<>();
+            toolMap.put("walking","maps_direction_walking_by_address");
+            toolMap.put("driving","maps_direction_driving_by_address");
+            toolMap.put("transit","maps_direction_transit_integrated_by_address");
+            String routeType=toolMap.containsKey(request.getRouteType()) ? request.getRouteType() : "walking";
+            String toolName=toolMap.get(routeType);
+            Map<String,Object> args=new HashMap<>();
+            args.put("origin_address",request.getOriginAddress());
+            args.put("destination_address",request.getDestinationAddress());
+            if (request.getOriginCity() != null) {
+                args.put("origin_city", request.getOriginCity());
+            }
+            if (request.getDestinationCity() != null) {
+                args.put("destination_city", request.getDestinationCity());
+            }
+            String text = mcpTool.callTool(toolName, args);
+            log.info("规划结果：{}",abbreviate(text));
+            RouteInfo routeInfo = AmapRouteParser.parse(text);
+            routeInfo.setRouteType(routeType);
+            rr.setSuccess(true);
+            rr.setMessage("规划完成");
+            rr.setData(routeInfo);
+            return rr;
+        }catch(Exception e){
+            log.error("规划路线失败：{}",e.getMessage(),e);
+            rr.setMessage("规划路线失败"+e.getMessage());
+            rr.setSuccess(false);
+        }
+        return rr;
     }
 
     private static boolean isBlank(String value) {

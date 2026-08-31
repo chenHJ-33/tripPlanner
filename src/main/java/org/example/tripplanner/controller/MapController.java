@@ -4,13 +4,12 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tripplanner.pojo.entity.WeatherInfo;
 import org.example.tripplanner.pojo.request.POISearchRequest;
+import org.example.tripplanner.pojo.request.RouteRequest;
 import org.example.tripplanner.pojo.response.POISearchResponse;
+import org.example.tripplanner.pojo.response.RouteResponse;
 import org.example.tripplanner.pojo.response.WeatherResponse;
 import org.example.tripplanner.service.MapService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/map")
@@ -29,5 +28,10 @@ public class MapController {
     public WeatherResponse getWeather(String city){
         log.info("请求：/api/map/poi, 参数：{}",city);
         return mapService.getWeather(city);
+    }
+    @PostMapping("/route")
+    public RouteResponse planRoute(RouteRequest request){
+        log.info("请求：/api/map/poi, 参数：{}",request);
+        return mapService.planRoute(request);
     }
 }
