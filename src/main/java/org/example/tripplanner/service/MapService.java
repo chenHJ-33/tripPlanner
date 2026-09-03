@@ -2,10 +2,7 @@ package org.example.tripplanner.service;
 
 import org.example.tripplanner.pojo.request.POISearchRequest;
 import org.example.tripplanner.pojo.request.RouteRequest;
-import org.example.tripplanner.pojo.response.HealthResponse;
-import org.example.tripplanner.pojo.response.POISearchResponse;
-import org.example.tripplanner.pojo.response.RouteResponse;
-import org.example.tripplanner.pojo.response.WeatherResponse;
+import org.example.tripplanner.pojo.response.*;
 
 public interface MapService {
     POISearchResponse searchPOI(POISearchRequest request);
@@ -15,4 +12,6 @@ public interface MapService {
     RouteResponse planRoute(RouteRequest request);
 
     HealthResponse healthCheck();
+
+    POIDetailResponse getPOIDetail(String poiId);
 }

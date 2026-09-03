@@ -8,11 +8,9 @@ import org.example.tripplanner.pojo.entity.RouteInfo;
 import org.example.tripplanner.pojo.entity.WeatherInfo;
 import org.example.tripplanner.pojo.request.POISearchRequest;
 import org.example.tripplanner.pojo.request.RouteRequest;
-import org.example.tripplanner.pojo.response.HealthResponse;
-import org.example.tripplanner.pojo.response.POISearchResponse;
-import org.example.tripplanner.pojo.response.RouteResponse;
-import org.example.tripplanner.pojo.response.WeatherResponse;
+import org.example.tripplanner.pojo.response.*;
 import org.example.tripplanner.service.MapService;
+import org.example.tripplanner.tool.AmapPoiDetailParser;
 import org.example.tripplanner.tool.AmapPoiParser;
 import org.example.tripplanner.tool.AmapRouteParser;
 import org.example.tripplanner.tool.AmapWeatherParser;
@@ -34,6 +32,7 @@ public class MapServiceImpl implements MapService {
     /** 高德 MCP 文本搜索工具名 */
     private static final String TOOL_TEXT_SEARCH = "maps_text_search";
     private static final String TOOL_WEATHER="maps_weather";
+    private static final String MAPS_SEARCH_DETAIL="maps_search_detail";
 
     @Resource
     private MCPTool mcpTool;
@@ -148,6 +147,31 @@ public class MapServiceImpl implements MapService {
             hr.setMapTollsCount(0);
         }
         return hr;
+    }
+
+    @Override
+    public POIDetailResponse getPOIDetail(String poiId) {
+        POIDetailResponse POIdr=new POIDetailResponse();
+        if (isBlank(poiId)){
+            POIdr.setMessage("poiId不能为空");
+            POIdr.setSuccess(false);
+            return POIdr;
+        }
+        try {
+            Map<String,Object> args=new HashMap<>();
+            args.put("id",poiId);
+            String text = mcpTool.callTool(MAPS_SEARCH_DETAIL, args);
+            log.info("poi详情：{}",text);
+            POIdr.setSuccess(true);
+            POIdr.setMessage("获取POI详情成功");
+            POIdr.setData(AmapPoiDetailParser.parse(text));
+
+        }catch (Exception e){
+            log.error("获取poi详情失败：{}",e.getMessage(),e);
+            POIdr.setMessage("获取POI详情失败");
+            POIdr.setSuccess(false);
+        }
+        return POIdr;
     }
 
     private static boolean isBlank(String value) {
