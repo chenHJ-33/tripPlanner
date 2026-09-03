@@ -1,5 +1,6 @@
 package org.example.tripplanner.service.impl;
 
+import io.modelcontextprotocol.spec.McpSchema;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tripplanner.pojo.entity.POIInfo;
@@ -7,6 +8,7 @@ import org.example.tripplanner.pojo.entity.RouteInfo;
 import org.example.tripplanner.pojo.entity.WeatherInfo;
 import org.example.tripplanner.pojo.request.POISearchRequest;
 import org.example.tripplanner.pojo.request.RouteRequest;
+import org.example.tripplanner.pojo.response.HealthResponse;
 import org.example.tripplanner.pojo.response.POISearchResponse;
 import org.example.tripplanner.pojo.response.RouteResponse;
 import org.example.tripplanner.pojo.response.WeatherResponse;
@@ -17,10 +19,10 @@ import org.example.tripplanner.tool.AmapWeatherParser;
 import org.example.tripplanner.tool.MCPTool;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * 地图服务实现：通过高德地图 MCP 工具查询
@@ -129,6 +131,23 @@ public class MapServiceImpl implements MapService {
             rr.setSuccess(false);
         }
         return rr;
+    }
+
+    @Override
+    public HealthResponse healthCheck() {
+        HealthResponse hr=new HealthResponse();
+        hr.setStatus("health");
+        hr.setService("map-service");
+        try {
+            List<McpSchema.Tool> tools = mcpTool.getMcpClientWrapper()
+                    .listTools()
+                    .block(Duration.ofSeconds(10));
+            hr.setMapTollsCount(tools == null ? 0 : tools.size());
+        } catch (Exception e) {
+            log.error("统计MCP工具数量失败: {}", e.getMessage(), e);
+            hr.setMapTollsCount(0);
+        }
+        return hr;
     }
 
     private static boolean isBlank(String value) {

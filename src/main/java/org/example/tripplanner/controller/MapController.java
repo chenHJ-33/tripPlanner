@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.tripplanner.pojo.entity.WeatherInfo;
 import org.example.tripplanner.pojo.request.POISearchRequest;
 import org.example.tripplanner.pojo.request.RouteRequest;
+import org.example.tripplanner.pojo.response.HealthResponse;
 import org.example.tripplanner.pojo.response.POISearchResponse;
 import org.example.tripplanner.pojo.response.RouteResponse;
 import org.example.tripplanner.pojo.response.WeatherResponse;
@@ -33,5 +34,10 @@ public class MapController {
     public RouteResponse planRoute(RouteRequest request){
         log.info("请求：/api/map/poi, 参数：{}",request);
         return mapService.planRoute(request);
+    }
+    @GetMapping("/health")
+    public HealthResponse healthCheck(){
+        log.info("请求：/api/map/health");
+        return mapService.healthCheck();
     }
 }
