@@ -31,11 +31,13 @@ public class MapController {
         return mapService.getWeather(city);
     }
     @PostMapping("/route")
+    // 规划两点之间的路线
     public RouteResponse planRoute(RouteRequest request){
         log.info("请求：/api/map/poi, 参数：{}",request);
         return mapService.planRoute(request);
     }
     @GetMapping("/health")
+    // 健康检测
     public HealthResponse healthCheck(){
         log.info("请求：/api/map/health");
         return mapService.healthCheck();
